@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "251994166439",
+    "project_id": "mylibrary-yoav-8745d",
+    "storage_bucket": "mylibrary-yoav-8745d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251994166439:android:9ca2c12a85f1d6a8fdb782",
+        "android_client_info": {
+          "package_name": "com.example.mylibrary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkL7QksLb89MdwBA1I24JA_mr9SltlgEo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
