@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.annotation.NonNull;
@@ -25,8 +26,9 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     FirebaseFirestore db;
-    EditText etBook, etAuthor, etPages;
+    EditText etBook, etAuthor, etPages,etRead;
     TextView tvStatus;
+    String loadedTitle = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +43,13 @@ public class MainActivity extends AppCompatActivity {
         etBook = findViewById(R.id.etBook);
         etAuthor = findViewById(R.id.etAuthor);
         etPages = findViewById(R.id.etPages);
+        etRead = findViewById(R.id.etRead);
         tvStatus = findViewById(R.id.tvStatus);
 
+
+
         Button btnSave=findViewById(R.id.btnSave);
+        Button btnLoad=findViewById(R.id.btnLoad);
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
@@ -65,12 +71,20 @@ public class MainActivity extends AppCompatActivity {
                     etPages.requestFocus();
                     return;
                 }
+                String readText = etRead.getText().toString();
+                if (readText.isEmpty()) {
+                    etRead.setError("חובה למלא מספר עמודים");
+                    etRead.requestFocus();
+                    return;
+                }
                 int pages = Integer.parseInt(pagesText);
+                int read=Integer.parseInt(readText);
                 Toast.makeText(MainActivity.this,"הנתונים נקלטו בהצלחה",Toast.LENGTH_SHORT).show();
                 Map<String, Object> book = new HashMap<>();
                 book.put("title", etBook.getText().toString());
                 book.put("author", etAuthor.getText().toString());
                 book.put("pages", pages);
+
 
                 tvStatus.setText("שומר...");
 
@@ -86,6 +100,42 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 tvStatus.setText("השמירה נכשלה: " + e.getMessage());
+                            }
+                        });
+                double percent = (read * 100.0) / pages;
+
+                tvStatus.setText("קראת " + read + " מתוך " + pages +
+                        " עמודים. התקדמות: " + percent + "%");            }
+        });
+
+        btnLoad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                tvStatus.setText("טוען...");
+
+                db.collection("books").document("current").get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot doc) {
+                                if (!doc.exists()) {
+                                    tvStatus.setText("עוד אין ספר שמור");
+                                    return;
+                                }
+                                etBook.setText(doc.getString("title"));
+                                etAuthor.setText(doc.getString("author"));
+                                Long pages = doc.getLong("pages");
+                                if (pages != null) {
+                                    etPages.setText(String.valueOf(pages));
+                                } else {
+                                    etPages.setText("");
+                                }
+                                tvStatus.setText("נטען מהענן");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                tvStatus.setText("הטעינה נכשלה: " + e.getMessage());
                             }
                         });
             }
